@@ -20,18 +20,18 @@ public class ShipmentHistory {
     //many to one
     //many shipmentHistory record belongs to one shipment
     @ManyToOne(cascade = {CascadeType.DETACH , CascadeType.MERGE, CascadeType.PERSIST ,CascadeType.REFRESH} )
-    @JoinColumn(name="shipment_id")
+    @JoinColumn(name="shipment_id",nullable = false)
     private Shipment shipment;
 
     @Column(name = "status")
     private ShipmentStatus status;
 
     @ManyToOne(cascade = {CascadeType.DETACH , CascadeType.MERGE, CascadeType.PERSIST ,CascadeType.REFRESH} )
-    @JoinColumn(name="who_make_the_change")
+    @JoinColumn(name="who_make_the_change",nullable = false)
     private User whoMakeTheChange;
 
     @CreationTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at",nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(name = "note")

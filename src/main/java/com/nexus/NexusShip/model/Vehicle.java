@@ -16,13 +16,13 @@ public class Vehicle {
     private Long id;
 
 
-    @Column(name = "max_weight")
+    @Column(name = "max_weight",nullable = false)
     private double maxWeight;
 
-    @Column(name = "max_height")
+    @Column(name = "max_height",nullable = false)
     private double  maxHeight;
 
-    @Column(name = "vehicle_type")
+    @Column(name = "vehicle_type",nullable = false)
     @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
 

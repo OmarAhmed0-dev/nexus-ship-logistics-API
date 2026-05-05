@@ -1,6 +1,7 @@
 package com.nexus.NexusShip.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,26 +19,27 @@ public abstract class User {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name",nullable = false)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name",nullable = false)
     private String lastName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender")
+    @Column(name = "gender",nullable = false)
     private Gender gender;
 
-    @Column(name = "national_id")
+    @Column(name = "national_id",nullable = false)
     private String nationalId;
 
-    @Column(name = "email")
+    @Column(name = "email",nullable = false)
+    @Email(message = "Invalid email")
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "password" ,nullable = false)
     private String password;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number",nullable = false)
     private String phoneNumber;
 
     @OneToMany(mappedBy = "whoMakeTheChange",

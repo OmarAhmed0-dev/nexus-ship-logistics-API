@@ -14,10 +14,10 @@ import java.util.List;
 @Setter
 public class Driver extends User{
 
-    @Column(name = "license_number")
+    @Column(name = "license_number",nullable = false)
     private String licenseNumber;
 
-    @Column(name = "salary")
+    @Column(name = "salary",nullable = false)
     private double salary;
 
     @Column(name = "rating")

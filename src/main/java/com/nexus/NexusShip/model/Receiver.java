@@ -19,7 +19,7 @@ public class Receiver {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number",nullable = false)
     private String phoneNumber;
 
     @OneToMany(mappedBy = "receiver" ,

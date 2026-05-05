@@ -33,7 +33,7 @@ public class Trip {
     private List<Shipment> shipmentList;
 
 
-    @Column(name = "status")
+    @Column(name = "status",nullable = false)
     @Enumerated(EnumType.STRING)
     private TripStatus status;
 

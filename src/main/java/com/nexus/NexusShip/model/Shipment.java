@@ -24,7 +24,7 @@ public class Shipment {
     @Column(name = "id")
     private Long id;
 
-    @Column(name ="created_at")
+    @Column(name ="created_at",nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name ="arrived_at")
@@ -33,12 +33,12 @@ public class Shipment {
     //Many Shipments belong to one sender
     @ManyToOne(cascade ={CascadeType.DETACH , CascadeType.MERGE,
                          CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "sender_id")
+    @JoinColumn(name = "sender_id",nullable = false)
     private Sender sender;
 
     @ManyToOne(cascade = {CascadeType.DETACH , CascadeType.MERGE,
                           CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "receiver_id")
+    @JoinColumn(name = "receiver_id",nullable = false)
     private Receiver receiver;
 
 
@@ -49,32 +49,32 @@ public class Shipment {
 
 
 
-    @Column(name = "description")
+    @Column(name = "description",nullable = false)
     private String description;
 
-    @Column(name = "weight")
+    @Column(name = "weight",nullable = false)
     private double weight;
 
-    @Column(name = "volume")
+    @Column(name = "volume",nullable = false)
     private double volume;
 
-    @Column(name = "status")
+    @Column(name = "status",nullable = false)
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
 
     @Column(name = "shipment_value")
     private BigDecimal shipmentValue;
 
-    @Column(name = "shipment_insurance")
+    @Column(name = "shipment_insurance" , columnDefinition = "false")
     private boolean shipmentInsurance;
 
     @Column(name = "shipment_cost")
     private BigDecimal cost;
 
-    @Column(columnDefinition = "geometry(Point, 4326)" , name = "pickup_location")
+    @Column(columnDefinition = "geometry(Point, 4326)" , name = "pickup_location" ,nullable = false)
     private Point pickUpLocation;
 
-    @Column(columnDefinition = "geometry(Point, 4326)" , name = "destination_location")
+    @Column(columnDefinition = "geometry(Point, 4326)" , name = "destination_location",nullable = false)
     private Point destinationLocation;
 
 

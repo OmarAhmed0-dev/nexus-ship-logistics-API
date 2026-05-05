@@ -15,13 +15,13 @@ import java.time.LocalDateTime;
 @Setter
 public class Admin extends User{
 
-    @Column(name = "salary")
+    @Column(name = "salary" ,nullable = false)
     private BigDecimal salary;
 
-    @Column(name = "hire_date")
+    @Column(name = "hire_date",nullable = false)
     private LocalDateTime hireDate;
 
-    @Column(name = "admin_role")
+    @Column(name = "admin_role",nullable = false)
     private AdminRole adminRole;
 
 
