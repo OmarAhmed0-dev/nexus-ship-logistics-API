@@ -1,7 +1,7 @@
 package com.nexus.NexusShip.service;
 
-import com.nexus.NexusShip.dto.update.SenderUpdateRequest;
-import com.nexus.NexusShip.exception.SenderNotFound;
+import com.nexus.NexusShip.dto.update.UserUpdateRequest;
+import com.nexus.NexusShip.exception.UserNotFound;
 import com.nexus.NexusShip.dto.request.SenderRequest;
 import com.nexus.NexusShip.dto.response.SenderResponse;
 import com.nexus.NexusShip.exception.UserAlreadyExists;
@@ -73,7 +73,7 @@ public class SenderService {
 
         return senderRepository.findById(id)
                 .map(senderMapper::toResponse)
-                .orElseThrow(() -> new SenderNotFound("There is no user with ID " + id));
+                .orElseThrow(() -> new UserNotFound("There is no user with ID " + id));
 
     }
 
@@ -81,7 +81,7 @@ public class SenderService {
     public void deleteSender(Long id) {
         //Check if the id exist
         Sender sender = senderRepository.findById(id)
-                .orElseThrow(() -> new SenderNotFound("There is no user with ID " + id));
+                .orElseThrow(() -> new UserNotFound("There is no user with ID " + id));
 
         sender.setDeleted(true);
         senderRepository.save(sender);
@@ -89,10 +89,10 @@ public class SenderService {
     }
 
     @Transactional
-    public SenderResponse updateSender(Long id, SenderUpdateRequest request) {
+    public SenderResponse updateSender(Long id, UserUpdateRequest request) {
 
         Sender sender = senderRepository.findById(id)
-                .orElseThrow(() -> new SenderNotFound("Sender not found with id: " + id));
+                .orElseThrow(() -> new UserNotFound("Sender not found with id: " + id));
 
         if (request.firstName() != null && !request.firstName().isBlank()) {
             sender.setFirstName(request.firstName());

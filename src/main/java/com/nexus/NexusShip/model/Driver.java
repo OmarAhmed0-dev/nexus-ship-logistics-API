@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class Driver extends User{
     private String licenseNumber;
 
     @Column(name = "salary",nullable = false)
-    private double salary;
+    private BigDecimal salary;
 
     @Column(name = "rating")
     private double rating;

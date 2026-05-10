@@ -4,7 +4,7 @@ package com.nexus.NexusShip.dto.update;
 import com.nexus.NexusShip.model.Gender;
 import jakarta.validation.constraints.*;
 
-public record SenderUpdateRequest(
+public record UserUpdateRequest(
         String firstName,
 
         String lastName,
