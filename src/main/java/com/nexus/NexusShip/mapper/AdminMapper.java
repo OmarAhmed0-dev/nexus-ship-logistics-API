@@ -1,14 +1,27 @@
 package com.nexus.NexusShip.mapper;
 
+
 import com.nexus.NexusShip.dto.request.AdminRegistrationRequest;
 import com.nexus.NexusShip.dto.response.AdminResponse;
+import com.nexus.NexusShip.dto.update.UserUpdateRequest;
 import com.nexus.NexusShip.model.Admin;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Component
-public class AdminMapper {
+@Mapper(componentModel = "spring" , nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface AdminMapper {
+    //Using MapStruct instead of manual mapping
 
-    public Admin toEntity(AdminRegistrationRequest request) {
+    Admin toEntity(AdminRegistrationRequest request) ;
+
+    AdminResponse toResponse(Admin admin);
+
+    void updateEntityFromDto(UserUpdateRequest dto , @MappingTarget Admin admin);
+
+
+
+   /* public Admin toEntity(AdminRegistrationRequest request) {
             Admin admin = new Admin();
             admin.setFirstName(request.firstName());
             admin.setLastName(request.lastName());
@@ -32,7 +45,7 @@ public class AdminMapper {
                 admin.getAdminRole()
         );
     }
-
+*/
 
 
 }

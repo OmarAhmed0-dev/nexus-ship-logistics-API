@@ -6,8 +6,10 @@ import com.nexus.NexusShip.dto.update.UserUpdateRequest;
 import com.nexus.NexusShip.exception.UserAlreadyExists;
 import com.nexus.NexusShip.exception.UserNotFound;
 import com.nexus.NexusShip.mapper.DriverMapper;
+import com.nexus.NexusShip.model.Admin;
 import com.nexus.NexusShip.model.Driver;
 import com.nexus.NexusShip.model.User;
+import com.nexus.NexusShip.repository.AdminRepository;
 import com.nexus.NexusShip.repository.DriverRepository;
 import com.nexus.NexusShip.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,17 +25,19 @@ import java.util.Optional;
 public class DriverService {
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
     private final DriverMapper driverMapper;
     private final PasswordEncoder passwordEncoder;
 
     private static  final BigDecimal INITIAL_SALARY = BigDecimal.valueOf(5000);
 
     @Autowired
-    public DriverService(DriverRepository driverRepository, UserRepository userRepository
-            , DriverMapper mapper, PasswordEncoder passwordEncoder) {
+    public DriverService(DriverRepository driverRepository, UserRepository userRepository, AdminRepository adminRepository
+            , DriverMapper driverMapper, PasswordEncoder passwordEncoder) {
         this.driverRepository = driverRepository;
         this.userRepository = userRepository;
-        this.driverMapper = mapper;
+        this.adminRepository = adminRepository;
+        this.driverMapper = driverMapper;
         this.passwordEncoder = passwordEncoder;
 
     }
@@ -49,6 +53,14 @@ public class DriverService {
 
         if (existingUser.isPresent()) {
             User user = existingUser.get();
+
+            //Check if the user is an active admin
+            Optional<Admin> admin = adminRepository.findById(user.getId());
+            if(admin.isPresent()) {
+                throw new UserAlreadyExists("This user is an active admin. He must be deleted from admins to become a driver.");
+            }
+
+
 
             //check if the user is a driver
 
@@ -171,13 +183,13 @@ public class DriverService {
     }
 
     @Transactional
-    public void raiseSalary(Long id ,BigDecimal raiseAmount) {
+    public DriverResponse raiseSalary(Long id ,BigDecimal raiseAmount) {
        Driver driver = driverRepository.findById(id)
                .orElseThrow(() -> new UserNotFound("There is no Driver with id " +id));
 
        BigDecimal newSalary = driver.getSalary().add(raiseAmount);
        driver.setSalary(newSalary);
-       driverRepository.save(driver);
+        return driverMapper.toResponse(driverRepository.save(driver));
     }
 
 

@@ -45,7 +45,7 @@ public class Driver extends User{
     public Driver(){}
 
     public Driver(String firstName, String lastName, Gender gender, String nationalId, String email, String password,
-                  String phoneNumber, String licenseNumber, double salary) {
+                  String phoneNumber, String licenseNumber, BigDecimal salary) {
         super(firstName, lastName, gender, nationalId, email, password, phoneNumber);
 
         this.licenseNumber = licenseNumber;
