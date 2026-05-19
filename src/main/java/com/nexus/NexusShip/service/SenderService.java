@@ -46,12 +46,12 @@ public class SenderService {
             Long userId = existingUserId.get();
             Optional<Long> existingSender = senderRepository.findSenderIdByIdEveryWhere(userId);
 
-            if(existingSender.isPresent()){
+            if (existingSender.isPresent()) {
                 Sender sender = senderRepository.findSenderByIdEveryWhere(userId).get();
-                if(!sender.isDeleted()) {
+                if (!sender.isDeleted()) {
                     //The sender is an active sender
                     throw new UserAlreadyExists("A user with this National ID already exists as an active sender.");
-                }else {
+                } else {
                     //The sender is deleted
 
                     userRepository.restoreUser(userId);
@@ -61,12 +61,9 @@ public class SenderService {
                     return senderMapper.toResponse(senderRepository.save(restoredSender));
 
                 }
-            }else {
-               userRepository.restoreUser(userId);
-                User restoredUser = userRepository.findUserByIdEveryWhere(userId) // استخدم الـ Native هنا
-                        .orElseThrow(() -> new UserNotFound("User not found for upgrade."));
-
-                return upgradeUserToSender(restoredUser);
+            } else {
+                userRepository.restoreUser(userId);
+                return upgradeUserToSender(userId);
             }
         }
 
@@ -88,11 +85,12 @@ public class SenderService {
         return senderMapper.toResponse(savedSender);
 
     }
+
     @Transactional
-    public SenderResponse upgradeUserToSender(User user) {
-        senderRepository.insertSenderRole(user.getId());
-        Sender upgradedSender = senderRepository.findById(user.getId())
-                .orElseThrow(()->new UserNotFound("Error during sender role upgrade."));
+    public SenderResponse upgradeUserToSender(Long userId) {
+        senderRepository.insertSenderRole(userId);
+        Sender upgradedSender = senderRepository.findSenderByIdEveryWhere(userId)
+                .orElseThrow(() -> new UserNotFound("Error during sender role upgrade."));
 
         return senderMapper.toResponse(senderRepository.save(upgradedSender));
     }
@@ -155,7 +153,7 @@ public class SenderService {
             sender.setGender(request.gender());
         }
 
-        return senderMapper.toResponse( senderRepository.save(sender));
+        return senderMapper.toResponse(senderRepository.save(sender));
 
     }
 

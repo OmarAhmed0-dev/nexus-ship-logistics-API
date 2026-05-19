@@ -9,7 +9,6 @@ import com.nexus.NexusShip.mapper.AdminMapper;
 import com.nexus.NexusShip.model.Admin;
 import com.nexus.NexusShip.model.AdminRole;
 import com.nexus.NexusShip.model.Driver;
-import com.nexus.NexusShip.model.User;
 import com.nexus.NexusShip.repository.AdminRepository;
 import com.nexus.NexusShip.repository.DriverRepository;
 import com.nexus.NexusShip.repository.UserRepository;
@@ -44,38 +43,48 @@ public class AdminService {
             //Check if the user is admin
             Long userId = existingUser.get();
 
-            //check if the user is a driver
+            //check if the user is an active driver
             Optional<Driver> driver = driverRepository.findById(userId);
             if (driver.isPresent()) {
                 throw new UserAlreadyExists("This user is an active driver. He must be deleted from drivers to become an Admin");
             }
 
-            //Check if the user is admin
-            Optional<Admin> existingAdmin = adminRepository.findById(userId);
-            if (existingAdmin.isPresent()) {
-                //The user is admin
-                //Check if the admin is deleted or not
-                Admin admin = existingAdmin.get();
-                if (admin.isDeleted()) {
-                    //The admin is deleted
+            //Check if the user is an active admin
+            Optional<Long> existingAdminId = adminRepository.findAdminIdByIdEverywhere(userId);
+            if (existingAdminId.isPresent()) {
+                //Check if deleted or no
+                Admin admin = adminRepository.findByIdEverywhere(existingAdminId.get())
+                        .orElseThrow(()-> new UserNotFound("Error during restore the admin"));
+                if(admin.isDeleted()){
+                    userRepository.restoreUser(userId);
                     admin.setDeleted(false);
+                    admin.setHireDate(LocalDateTime.now());
+                    admin.setSalary(INITIAL_SALARY);
+                    if(request.adminRole()!=null){
+                        admin.setAdminRole(request.adminRole());
+                    }
                     return adminMapper.toResponse(adminRepository.save(admin));
                 } else {
-                    //The admin exists and not deleted
-                    throw new UserAlreadyExists("This admin is already exist.");
+                    //The admin is exist and active
+                    throw new UserAlreadyExists("This admin is already exist and active.");
                 }
+
             } else {
-                //The user is exists but not an admin
-                User user = userRepository.findById(userId).get();
-                return upgradeUserToAdmin(user);
+
+                userRepository.restoreUser(userId);
+                return upgradeUserToAdmin(userId);
+
             }
 
         }
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new UserAlreadyExists("Email is already in use.");
         }
-        Admin admin = adminMapper.toEntity(request);
+        if (userRepository.findByNationalId(request.nationalId()).isPresent()) {
+            throw new UserAlreadyExists("National ID is already in use.");
+        }
 
+        Admin admin = adminMapper.toEntity(request);
         admin.setPassword(passwordEncoder.encode(request.password()));
         admin.setSalary(INITIAL_SALARY);
         admin.setHireDate(LocalDateTime.now());
@@ -85,9 +94,9 @@ public class AdminService {
     }
 
     @Transactional
-    public AdminResponse upgradeUserToAdmin(User user) {
-        adminRepository.insertAdminRole(user.getId());
-        Admin admin = adminRepository.findById(user.getId())
+    public AdminResponse upgradeUserToAdmin(Long userId) {
+        adminRepository.insertAdminRole(userId);
+        Admin admin = adminRepository.findByIdEverywhere(userId)
                 .orElseThrow(() -> new UserNotFound("Error during upgrading to admin"));
         admin.setHireDate(LocalDateTime.now());
         admin.setSalary(INITIAL_SALARY);

@@ -8,7 +8,6 @@ import com.nexus.NexusShip.exception.UserNotFound;
 import com.nexus.NexusShip.mapper.DriverMapper;
 import com.nexus.NexusShip.model.Admin;
 import com.nexus.NexusShip.model.Driver;
-import com.nexus.NexusShip.model.User;
 import com.nexus.NexusShip.repository.AdminRepository;
 import com.nexus.NexusShip.repository.DriverRepository;
 import com.nexus.NexusShip.repository.UserRepository;
@@ -86,15 +85,15 @@ public class DriverService {
                 }
                 //Upgrade User to driver
 
+                // Here make a _clazz error because the SQL does not know which take the use belongs(Sender,Admin,Driver)
+/*
                 User user = userRepository.findUserByIdEveryWhere(userId)
                         .orElseThrow(() -> new UserNotFound("Error during restore the user"));
+*/
 
-                //check if the user is deleted
-                if (user.isDeleted()) {
-                    userRepository.restoreUser(user.getId());
-                }
+                userRepository.restoreUser(userId);
 
-                return upgradeSenderToDriver(user, request);
+                return upgradeSenderToDriver(userId, request);
             }
         }
         //Check for the new drivers
@@ -115,10 +114,10 @@ public class DriverService {
     }
 
     @Transactional
-    public DriverResponse upgradeSenderToDriver(User user, DriverRegistrationRequest request) {
-        driverRepository.insertDriverRole(user.getId(), request.licenseNumber(), 0.0, INITIAL_SALARY);
+    public DriverResponse upgradeSenderToDriver(Long userId, DriverRegistrationRequest request) {
+        driverRepository.insertDriverRole(userId, request.licenseNumber(), 0.0, INITIAL_SALARY);
         //To avoid cached version
-        Driver upgradedDriver = driverRepository.findByIdEverywhere(user.getId())
+        Driver upgradedDriver = driverRepository.findByIdEverywhere(userId)
                 .orElseThrow(() -> new UserNotFound("Error during upgrade process."));
         return driverMapper.toResponse(upgradedDriver);
     }
