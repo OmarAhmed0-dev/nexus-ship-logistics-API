@@ -6,6 +6,7 @@ import com.nexus.NexusShip.exception.AlreadyExistsException;
 import com.nexus.NexusShip.exception.NotFoundException;
 import com.nexus.NexusShip.mapper.VehicleMapper;
 import com.nexus.NexusShip.model.Vehicle;
+import com.nexus.NexusShip.model.VehicleStatus;
 import com.nexus.NexusShip.model.VehicleType;
 import com.nexus.NexusShip.repository.VehicleRepository;
 import jakarta.transaction.Transactional;
@@ -60,12 +61,13 @@ public class VehicleService {
                 if (vehicle.isDeleted()) {
                     return RestoreVehicle(vehicle);
                 } else {
-                    throw new AlreadyExistsException("Vehicle with id " + existingVehicleId + " already exists");
+                    throw new AlreadyExistsException("Vehicle with License Plate " + request.licensePlate() + " already exists");
                 }
             }
 
 
         }
+
         Vehicle vehicle = vehicleMapper.toEntity(request);
         vehicle.setMaxWeight(request.vehicleType().getMaxWeight());
         vehicle.setMaxVolume(request.vehicleType().getMaxVolume());
@@ -73,6 +75,7 @@ public class VehicleService {
         vehicle.setAvailableVolume(vehicle.getMaxVolume());
         vehicle.setAvailableWeight(vehicle.getMaxWeight());
         return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
+
 
     }
 
@@ -97,6 +100,29 @@ public class VehicleService {
     public List<VehicleResponse> findAllOnTripVehicles(){
         return vehicleRepository.findAllOnTripVehicles().stream()
                 .map(vehicleMapper::toResponse).toList();
+    }
+
+
+    //Search for vehicles to be used in the controller
+
+    public List<VehicleResponse> searchVehicles (VehicleStatus status,VehicleType type){
+        if(status == null && type == null) {
+            return findAllVehicles();
+        }
+        if(status == null) {
+            return findAllVehiclesByType(type);
+        }
+        if(type!=null) {
+           if(status == VehicleStatus.AVAILABLE) {
+               // Find available vehicles by type
+               return findAvailableVehiclesByType(type);
+           }
+        }
+        return switch (status) {
+            case AVAILABLE -> findAllAvailableVehicles();
+            case MAINTENANCE -> findAllInMaintenanceVehicles();
+            case ON_TRIP -> findAllOnTripVehicles();
+        };
     }
 
 
