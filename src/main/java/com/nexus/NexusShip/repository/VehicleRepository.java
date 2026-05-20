@@ -2,6 +2,8 @@ package com.nexus.NexusShip.repository;
 
 import com.nexus.NexusShip.model.Vehicle;
 import com.nexus.NexusShip.model.VehicleType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.geolatte.geom.V;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -39,4 +41,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     Optional<Vehicle> findVehicleByIdIncludingDeleted(@Param("id") Long id);
 
 
+    @Query("select v from Vehicle v where v.licensePlate =:licensePlate")
+    Optional<Vehicle> findVehicleIdByLicensePlate(String licensePlate);
 }
