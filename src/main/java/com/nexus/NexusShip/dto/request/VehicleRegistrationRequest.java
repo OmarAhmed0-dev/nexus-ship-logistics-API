@@ -1,11 +1,22 @@
 package com.nexus.NexusShip.dto.request;
 
 import com.nexus.NexusShip.model.VehicleType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record VehicleRegistrationRequest(
 
         @NotNull(message = "Vehicle type is required")
-        VehicleType vehicleType
+        VehicleType vehicleType,
+
+        @NotBlank(message = "License plate cannot be blank")
+        @Pattern(
+                regexp = "^[\\u0621-\\u064A]{3}\\s?[0-9]{3,4}$",
+                message = "Invalid Egyptian license plate format. Must be 3 Arabic letters followed by 3 or 4 digits.")
+        String licensePlate
+
+
+
 
 ) {}

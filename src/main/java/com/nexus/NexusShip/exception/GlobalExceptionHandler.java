@@ -19,18 +19,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, status);
     }
 
-    @ExceptionHandler(UserNotFound.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(UserNotFound ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(UserAlreadyExists.class)
-    public ResponseEntity<ErrorResponse> handleUserExists(UserAlreadyExists ex) {
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserExists(AlreadyExistsException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(InvalidPhoneNumber.class)
-    public ResponseEntity<ErrorResponse> handleInvalidPhoneNumber(InvalidPhoneNumber ex) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPhoneNumber(ConflictException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
 
     }
@@ -47,4 +47,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
         return buildErrorResponse("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
 }

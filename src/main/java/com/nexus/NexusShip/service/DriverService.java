@@ -3,8 +3,8 @@ package com.nexus.NexusShip.service;
 import com.nexus.NexusShip.dto.request.DriverRegistrationRequest;
 import com.nexus.NexusShip.dto.response.DriverResponse;
 import com.nexus.NexusShip.dto.update.UserUpdateRequest;
-import com.nexus.NexusShip.exception.UserAlreadyExists;
-import com.nexus.NexusShip.exception.UserNotFound;
+import com.nexus.NexusShip.exception.AlreadyExistsException;
+import com.nexus.NexusShip.exception.NotFoundException;
 import com.nexus.NexusShip.mapper.DriverMapper;
 import com.nexus.NexusShip.model.Admin;
 import com.nexus.NexusShip.model.Driver;
@@ -55,7 +55,7 @@ public class DriverService {
             //Check if the user is an active admin
             Optional<Admin> admin = adminRepository.findById(userId);
             if (admin.isPresent()) {
-                throw new UserAlreadyExists("This user is an active admin. He must be deleted from admins to become a driver.");
+                throw new AlreadyExistsException("This user is an active admin. He must be deleted from admins to become a driver.");
             }
             Optional<Long> existingDriverId = driverRepository.findDriverIdByIdEverywhere(userId);
 
@@ -65,7 +65,7 @@ public class DriverService {
                 //it means that the user is a driver
                 //check if he is active or deleted driver
                 Driver driver = driverRepository.findByIdEverywhere(existingDriverId.get())
-                        .orElseThrow(() -> new UserNotFound("Error during restore the driver"));
+                        .orElseThrow(() -> new NotFoundException("Error during restore the driver"));
 
 
                 if (driver.isDeleted()) {
@@ -75,13 +75,13 @@ public class DriverService {
                     return driverMapper.toResponse(driverRepository.save(driver));
                 } else {
                     //Already active driver
-                    throw new UserAlreadyExists("You are already exist as an active driver");
+                    throw new AlreadyExistsException("You are already exist as an active driver");
                 }
 
             } else {
                 //Check if the license number is used
                 if (driverRepository.findDriverIdByLicenseNumberEverywhere(request.licenseNumber()).isPresent()) {
-                    throw new UserAlreadyExists("This license number is already registered by another driver.");
+                    throw new AlreadyExistsException("This license number is already registered by another driver.");
                 }
                 //Upgrade User to driver
 
@@ -98,11 +98,11 @@ public class DriverService {
         }
         //Check for the new drivers
         if (driverRepository.findDriverIdByLicenseNumberEverywhere(request.licenseNumber()).isPresent()) {
-            throw new UserAlreadyExists("This license number is already registered.");
+            throw new AlreadyExistsException("This license number is already registered.");
         }
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new UserAlreadyExists("Email is already in use.");
+            throw new AlreadyExistsException("Email is already in use.");
         }
 
         Driver newDriver = driverMapper.toEntity(request);
@@ -118,7 +118,7 @@ public class DriverService {
         driverRepository.insertDriverRole(userId, request.licenseNumber(), 0.0, INITIAL_SALARY);
         //To avoid cached version
         Driver upgradedDriver = driverRepository.findByIdEverywhere(userId)
-                .orElseThrow(() -> new UserNotFound("Error during upgrade process."));
+                .orElseThrow(() -> new NotFoundException("Error during upgrade process."));
         return driverMapper.toResponse(upgradedDriver);
     }
 
@@ -130,12 +130,12 @@ public class DriverService {
     public DriverResponse findDriverById(Long id) {
         return driverRepository.findById(id)
                 .map(driverMapper::toResponse)
-                .orElseThrow(() -> new UserNotFound("There is no driver with id: " + id));
+                .orElseThrow(() -> new NotFoundException("There is no driver with id: " + id));
     }
 
     @Transactional
     public void deleteDriver(Long id) {
-        Driver driver = driverRepository.findById(id).orElseThrow(() -> new UserNotFound("There is no driver with id: " + id));
+        Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("There is no driver with id: " + id));
         driver.setDeleted(true);
         driverRepository.save(driver);
     }
@@ -144,7 +144,7 @@ public class DriverService {
     public DriverResponse updateDriver(Long id, UserUpdateRequest request) {
 
         Driver driver = driverRepository.findById(id)
-                .orElseThrow(() -> new UserNotFound("Driver not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Driver not found with id: " + id));
 
         if (request.firstName() != null && !request.firstName().isBlank()) {
             driver.setFirstName(request.firstName());
@@ -157,7 +157,7 @@ public class DriverService {
             userRepository.findByPhoneNumber(request.phoneNumber())
                     .ifPresent(existingUser -> {
                         if (!existingUser.getId().equals(id)) {
-                            throw new UserAlreadyExists("This phone number is already user by another user");
+                            throw new AlreadyExistsException("This phone number is already user by another user");
                         }
                     });
             driver.setPhoneNumber(request.phoneNumber());
@@ -178,7 +178,7 @@ public class DriverService {
     public DriverResponse findDriverByLicenseNumber(String licenseNumber) {
         Optional<Driver> driver = driverRepository.findByLicenseNumber(licenseNumber);
         if (driver.isEmpty()) {
-            throw new UserNotFound("There is no driver with License Number :" + licenseNumber);
+            throw new NotFoundException("There is no driver with License Number :" + licenseNumber);
         }
         return driverMapper.toResponse(driver.get());
 
@@ -202,7 +202,7 @@ public class DriverService {
     @Transactional
     public DriverResponse raiseSalary(Long id, BigDecimal raiseAmount) {
         Driver driver = driverRepository.findById(id)
-                .orElseThrow(() -> new UserNotFound("There is no Driver with id " + id));
+                .orElseThrow(() -> new NotFoundException("There is no Driver with id " + id));
 
         BigDecimal newSalary = driver.getSalary().add(raiseAmount);
         driver.setSalary(newSalary);
