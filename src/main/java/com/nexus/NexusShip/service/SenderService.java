@@ -1,13 +1,12 @@
 package com.nexus.NexusShip.service;
 
 import com.nexus.NexusShip.dto.update.UserUpdateRequest;
-import com.nexus.NexusShip.exception.UserNotFound;
+import com.nexus.NexusShip.exception.NotFoundException;
 import com.nexus.NexusShip.dto.request.SenderRequest;
 import com.nexus.NexusShip.dto.response.SenderResponse;
-import com.nexus.NexusShip.exception.UserAlreadyExists;
+import com.nexus.NexusShip.exception.AlreadyExistsException;
 import com.nexus.NexusShip.mapper.SenderMapper;
 import com.nexus.NexusShip.model.Sender;
-import com.nexus.NexusShip.model.User;
 import com.nexus.NexusShip.repository.SenderRepository;
 import com.nexus.NexusShip.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -50,13 +49,13 @@ public class SenderService {
                 Sender sender = senderRepository.findSenderByIdEveryWhere(userId).get();
                 if (!sender.isDeleted()) {
                     //The sender is an active sender
-                    throw new UserAlreadyExists("A user with this National ID already exists as an active sender.");
+                    throw new AlreadyExistsException("A user with this National ID already exists as an active sender.");
                 } else {
                     //The sender is deleted
 
                     userRepository.restoreUser(userId);
                     Sender restoredSender = senderRepository.findSenderByIdEveryWhere(userId)
-                            .orElseThrow(() -> new UserNotFound("There is a problem during restore the deleted User."));
+                            .orElseThrow(() -> new NotFoundException("There is a problem during restore the deleted User."));
                     restoredSender.setDeleted(false);
                     return senderMapper.toResponse(senderRepository.save(restoredSender));
 
@@ -69,7 +68,7 @@ public class SenderService {
 
         //Check if the Email is exists
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new UserAlreadyExists("Email is already in use.");
+            throw new AlreadyExistsException("Email is already in use.");
         }
 
         //Map DTO to Entity
@@ -90,7 +89,7 @@ public class SenderService {
     public SenderResponse upgradeUserToSender(Long userId) {
         senderRepository.insertSenderRole(userId);
         Sender upgradedSender = senderRepository.findSenderByIdEveryWhere(userId)
-                .orElseThrow(() -> new UserNotFound("Error during sender role upgrade."));
+                .orElseThrow(() -> new NotFoundException("Error during sender role upgrade."));
 
         return senderMapper.toResponse(senderRepository.save(upgradedSender));
     }
@@ -106,7 +105,7 @@ public class SenderService {
 
         return senderRepository.findById(id)
                 .map(senderMapper::toResponse)
-                .orElseThrow(() -> new UserNotFound("There is no user with ID " + id));
+                .orElseThrow(() -> new NotFoundException("There is no user with ID " + id));
 
     }
 
@@ -114,7 +113,7 @@ public class SenderService {
     public void deleteSender(Long id) {
         //Check if the id exist
         Sender sender = senderRepository.findById(id)
-                .orElseThrow(() -> new UserNotFound("There is no user with ID " + id));
+                .orElseThrow(() -> new NotFoundException("There is no user with ID " + id));
 
         sender.setDeleted(true);
         senderRepository.save(sender);
@@ -127,7 +126,7 @@ public class SenderService {
         System.out.println("The received request is " + request);
 
         Sender sender = senderRepository.findById(id)
-                .orElseThrow(() -> new UserNotFound("Sender not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Sender not found with id: " + id));
 
         if (request.firstName() != null && !request.firstName().isBlank()) {
             sender.setFirstName(request.firstName());
@@ -140,7 +139,7 @@ public class SenderService {
             userRepository.findByPhoneNumber(request.phoneNumber())
                     .ifPresent(existingUser -> {
                         if (!existingUser.getId().equals(id)) {
-                            throw new UserAlreadyExists("This phone number is already user by another user");
+                            throw new AlreadyExistsException("This phone number is already user by another user");
                         }
                     });
             sender.setPhoneNumber(request.phoneNumber());
