@@ -3,7 +3,7 @@ package com.nexus.NexusShip.service;
 import com.nexus.NexusShip.dto.request.ShipmentRequest;
 import com.nexus.NexusShip.dto.response.ShipmentHistoryResponse;
 import com.nexus.NexusShip.dto.response.ShipmentResponse;
-import com.nexus.NexusShip.dto.update.UpdateShipmentRequest;
+import com.nexus.NexusShip.dto.update.ShipmentUpdateRequest;
 import com.nexus.NexusShip.exception.NotFoundException;
 import com.nexus.NexusShip.mapper.ShipmentHistoryMapper;
 import com.nexus.NexusShip.mapper.ShipmentMapper;
@@ -134,7 +134,11 @@ public class ShipmentService {
     }
 
 
-    public List<ShipmentResponse> findAllShipments() {
+    public List<ShipmentResponse> findAllShipments(Long userId) {
+        boolean isAdmin = adminRepository.existsById(userId);
+        if(!isAdmin) {
+            throw new SecurityException("Unauthorized: You do not have permission to view the shipments.");
+        }
         return shipmentRepository.findAll().stream().map(shipmentMapper::toResponse).toList();
     }
 
@@ -142,13 +146,19 @@ public class ShipmentService {
         return shipmentRepository.findAllByStatus(status).stream().map(shipmentMapper::toResponse).toList();
     }
 
-    public List<ShipmentResponse> findAllUserShipments(Long id) {
-        return shipmentRepository.findAllUserShipments(id).stream().map(shipmentMapper::toResponse).toList();
+    public List<ShipmentResponse> findAllUserShipments(Long userId) {
+        return shipmentRepository.findAllUserShipments(userId).stream().map(shipmentMapper::toResponse).toList();
     }
 
-    public List<ShipmentHistoryResponse> getShipmentHistory(Long shipmentId) {
+    public List<ShipmentHistoryResponse> getShipmentHistory(Long shipmentId ,Long userId) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new NotFoundException("Shipment with id " + shipmentId + " not found"));
+        boolean isAdmin = adminRepository.existsById(userId);
+        boolean isOwner = shipment.getSender().getId().equals(userId);
+
+        if (!isAdmin && !isOwner) {
+            throw new IllegalArgumentException("Unauthorized: You do not have permission to view this shipment.");
+        }
 
         return shipment.getHistory().stream()
                 .map(shipmentHistoryMapper::toResponse).toList();
@@ -167,7 +177,7 @@ public class ShipmentService {
     }
 
     @Transactional
-    public ShipmentResponse updateShipmentDetails(Long shipmentId, Long userId, UpdateShipmentRequest request) {
+    public ShipmentResponse updateShipmentDetails(Long shipmentId, Long userId, ShipmentUpdateRequest request) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new NotFoundException("Shipment not found"));
 
@@ -178,18 +188,21 @@ public class ShipmentService {
         if (shipment.getStatus() != ShipmentStatus.PENDING) {
             throw new IllegalStateException("Cannot update shipment details. Status is " + shipment.getStatus());
         }
-        Receiver receiver = receiverRepository.findByPhoneNumber(request.receiverPhoneNumber())
-                .orElseGet(() -> {
-                    Receiver newReceiver = new Receiver();
-                    newReceiver.setPhoneNumber(request.receiverPhoneNumber());
-                    return receiverRepository.save(newReceiver);
-                });
-        shipment.setDescription(request.description());
-        shipment.setWeight(request.weight());
-        shipment.setVolume(request.volume());
-        shipment.setShipmentValue(request.shipmentValue());
-        shipment.setShipmentInsurance(request.shipmentInsurance());
-
+        if (request.description() != null) {
+            shipment.setDescription(request.description());
+        }
+        if (request.weight() != null) {
+            shipment.setWeight(request.weight());
+        }
+        if (request.volume() != null) {
+            shipment.setVolume(request.volume());
+        }
+        if (request.shipmentValue() != null) {
+            shipment.setShipmentValue(request.shipmentValue());
+        }
+        if (request.shipmentInsurance() != null) {
+            shipment.setShipmentInsurance(request.shipmentInsurance());
+        }
 
         BigDecimal cost = pricingService.calculateShipmentCost(shipment);
         shipment.setCost(cost);
