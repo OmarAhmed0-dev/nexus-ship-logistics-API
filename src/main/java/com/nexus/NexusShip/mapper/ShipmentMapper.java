@@ -5,12 +5,18 @@ import com.nexus.NexusShip.dto.response.ShipmentResponse;
 import com.nexus.NexusShip.model.Receiver;
 import com.nexus.NexusShip.model.Sender;
 import com.nexus.NexusShip.model.Shipment;
+import org.mapstruct.Mapper;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.stereotype.Component;
 
-@Component
-public class ShipmentMapper {
+@Mapper(componentModel = "spring"  ,nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface ShipmentMapper {
 
-    public Shipment toEntity(ShipmentRequest request , Sender sender, Receiver receiver) {
+    public Shipment toEntity(ShipmentRequest request);
+
+    public ShipmentResponse toResponse(Shipment shipment);
+
+   /* public Shipment toEntity(ShipmentRequest request , Sender sender, Receiver receiver) {
 
         Shipment shipment = new Shipment();
         shipment.setWeight(request.weight());
@@ -43,5 +49,5 @@ public class ShipmentMapper {
 
         );
 
-    }
+    }*/
 }

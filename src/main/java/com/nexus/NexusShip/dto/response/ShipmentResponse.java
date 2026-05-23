@@ -16,7 +16,11 @@ public record ShipmentResponse(
         ShipmentStatus status,
         BigDecimal cost,
         LocalDateTime createdAt,
-        Point pickUpLocation,
-        Point destinationLocation
+        String pickupGovernorate,
+        String pickupCity,
+        String pickupAddress,
+        String destinationGovernorate,
+        String destinationCity,
+        String destinationAddress
 
 ) {}

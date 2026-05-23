@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 
 //java.awt.Point is for desktop GUI coordinates (pixels on a screen). It will not work with PostGIS or spatial database queries.
 //So we use
-import lombok.Getter;
-import lombok.Setter;
 import org.locationtech.jts.geom.Point;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,6 +19,8 @@ import java.util.List;
 @Table(name = "shipment")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Shipment {
 
     @Id
@@ -31,19 +35,16 @@ public class Shipment {
     private LocalDateTime arrivedAt;
 
     //Many Shipments belong to one sender
-    @ManyToOne(cascade ={CascadeType.DETACH , CascadeType.MERGE,
-                         CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade ={CascadeType.DETACH , CascadeType.MERGE})
     @JoinColumn(name = "sender_id",nullable = false)
     private Sender sender;
 
-    @ManyToOne(cascade = {CascadeType.DETACH , CascadeType.MERGE,
-                          CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "receiver_id",nullable = false)
     private Receiver receiver;
 
 
-    @ManyToOne( cascade ={CascadeType.DETACH , CascadeType.MERGE,
-            CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne()
     @JoinColumn(name = "trip_id")
     private Trip trip;
 
@@ -65,21 +66,39 @@ public class Shipment {
     @Column(name = "shipment_value")
     private BigDecimal shipmentValue;
 
-    @Column(name = "shipment_insurance" , columnDefinition = "false")
+    @Column(name = "shipment_insurance")
     private boolean shipmentInsurance;
 
     @Column(name = "shipment_cost")
     private BigDecimal cost;
 
+    @Column(name = "pickup_governorate",nullable = false)
+    private String pickupGovernorate;
+
+    @Column(name = "pickup_city",nullable = false)
+    private String pickupCity;
+
+    @Column(name = "pickup_address",nullable = false)
+    private String pickupAddress;
+
     @Column(columnDefinition = "geometry(Point, 4326)" , name = "pickup_location" ,nullable = false)
     private Point pickUpLocation;
 
+    @Column(name = "destination_governorate" ,nullable = false)
+    private String destinationGovernorate;
+
+    @Column(name = "destination_city",nullable = false)
+    private String destinationCity;
+
+    @Column(name = "destination_address",nullable = false)
+    private String destinationAddress;
+    
     @Column(columnDefinition = "geometry(Point, 4326)" , name = "destination_location",nullable = false)
     private Point destinationLocation;
 
 
     @OneToMany(mappedBy = "shipment" ,
-            cascade = {CascadeType.DETACH , CascadeType.MERGE, CascadeType.PERSIST ,CascadeType.REFRESH})
+            cascade = CascadeType.ALL , orphanRemoval = true)
     private List<ShipmentHistory> history;
 
     public void changeStatus(ShipmentHistory action) {
@@ -91,26 +110,9 @@ public class Shipment {
         action.setShipment(this);
     }
 
-
-
-    public Shipment(){}
-
-    public Shipment(LocalDateTime createdAt, LocalDateTime arrivedAt, Receiver receiver, Sender sender, double weight,
-                    double volume, ShipmentStatus status, BigDecimal shipmentValue, boolean shippingInsurace, BigDecimal cost,
-                    Point pickUpLocation, Point destinationLocation , String description) {
-        this.createdAt = createdAt;
-        this.arrivedAt = arrivedAt;
-        this.receiver = receiver;
-        this.sender = sender;
-        this.weight = weight;
-        this.volume = volume;
-        this.status = status;
-        this.shipmentValue = shipmentValue;
-        this.shipmentInsurance = shippingInsurace;
-        this.cost = cost;
-        this.pickUpLocation = pickUpLocation;
-        this.destinationLocation = destinationLocation;
-        this.description = description;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
 
@@ -128,11 +130,14 @@ public class Shipment {
                 ", volume=" + volume +
                 ", status=" + status +
                 ", shipmentValue=" + shipmentValue +
-                ", shippingInsurace=" + shipmentInsurance +
+                ", shipmentInsurance=" + shipmentInsurance +
                 ", cost=" + cost +
-                ", pickUpLocation=" + pickUpLocation +
-                ", destinationLocation=" + destinationLocation +
-                ", history=" + history +
+                ", pickupGovernorate='" + pickupGovernorate + '\'' +
+                ", pickupCity='" + pickupCity + '\'' +
+                ", pickupAddress='" + pickupAddress + '\'' +
+                ", destinationGovernorate='" + destinationGovernorate + '\'' +
+                ", destinationCity='" + destinationCity + '\'' +
+                ", destinationAddress='" + destinationAddress + '\'' +
                 '}';
     }
 }

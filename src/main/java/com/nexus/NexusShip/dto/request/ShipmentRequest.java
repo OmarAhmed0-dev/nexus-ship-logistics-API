@@ -3,6 +3,7 @@ package com.nexus.NexusShip.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.locationtech.jts.geom.Point;
 
 import java.math.BigDecimal;
@@ -24,11 +25,38 @@ public record ShipmentRequest(
         @NotNull(message = "Shipment value is required")
         BigDecimal shipmentValue,
 
-        @NotNull(message = "Pick up location is required")
-        Point pickUpLocation,
+        @NotBlank(message = "Pickup governorate is required")
+        String pickupGovernorate,
 
-        @NotNull(message = "Destination location is required")
-        Point destinationLocation,
+        @NotBlank(message = "Pickup city/district is required")
+        String pickupCity,
+
+        @NotBlank(message = "Detailed pickup address is required")
+        @Size(min = 20, message = "Please provide a more detailed pickup address")
+        String pickupAddress,
+
+        @NotNull(message = "Pickup latitude is required")
+        double pickupLatitude,
+
+        @NotNull(message = "Pickup longitude is required")
+        double pickupLongitude,
+
+        @NotBlank(message = "Destination governorate is required")
+        String destinationGovernorate,
+
+        @NotBlank(message = "Destination city/district is required")
+        String  destinationCity,
+
+        @NotBlank(message = "Detailed destination address is required")
+        @Size(min = 20, message = "Please provide a more detailed destination address")
+        String  destinationAddress,
+
+        @NotNull(message = "Destination latitude is required")
+        double destinationLatitude,
+
+        @NotNull(message = "Destination longitude is required")
+        double destinationLongitude,
+
 
 
         // Creating a receiver Object if not Exist
