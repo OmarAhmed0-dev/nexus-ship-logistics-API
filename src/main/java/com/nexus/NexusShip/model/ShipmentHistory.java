@@ -24,6 +24,7 @@ public class ShipmentHistory {
     private Shipment shipment;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
 
     @ManyToOne(cascade = {CascadeType.DETACH , CascadeType.MERGE, CascadeType.PERSIST ,CascadeType.REFRESH} )

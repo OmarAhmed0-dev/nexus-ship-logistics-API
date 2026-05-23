@@ -1,16 +1,13 @@
 package com.nexus.NexusShip.dto.update;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-public record UpdateShipmentRequest(
+public record ShipmentUpdateRequest(
 
-        double weight,
-        double volume,
+        Double weight,
+        Double volume,
         String description,
         BigDecimal shipmentValue,
 
@@ -19,6 +16,6 @@ public record UpdateShipmentRequest(
                 message = "Please enter a valid Egyptian mobile number"
         )
         String receiverPhoneNumber,
-        boolean shipmentInsurance
+        Boolean shipmentInsurance
 ) {
 }
