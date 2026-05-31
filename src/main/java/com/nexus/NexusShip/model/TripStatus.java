@@ -1,7 +1,7 @@
 package com.nexus.NexusShip.model;
 
 public enum TripStatus {
-    PLANNED,
+    READY,
     ACTIVE,
     COMPLETED,
     CANCELLED;
