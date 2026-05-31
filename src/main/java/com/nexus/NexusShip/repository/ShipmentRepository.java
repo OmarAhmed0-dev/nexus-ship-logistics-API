@@ -25,4 +25,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment,Long> {
 
     @Query("select s from Shipment s where s.sender.id =:id")
     List<Shipment> findAllUserShipments(@Param("id")Long id);
+
+    List<Shipment> findAllByStatusAndPickupGovernorateAndPickupCity (ShipmentStatus shipmentStatus, String pickupGovernorate, String pickupCity);
+    List<Shipment> findAllByStatusAndDestinationGovernorateAndDestinationCity(ShipmentStatus shipmentStatus, String pickupGovernorate, String pickupCity);
 }
