@@ -33,6 +33,10 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     @Query("SELECT v from Vehicle v where v.status = 'ON_TRIP' ")
     List<Vehicle> findAllOnTripVehicles();
 
+    @Query("SELECT v from Vehicle v where v.status = 'ASSIGNED' ")
+    List<Vehicle> findAllAssignedVehicles();
+
+
 
     @Query(value = "select  id from vehicle where license_plate =:licensePlate" , nativeQuery = true)
     Optional<Long> findVehicleIdByLicensePlateIncludingDeleted(@Param("licensePlate") String licensePlate);
