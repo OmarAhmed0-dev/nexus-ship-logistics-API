@@ -122,10 +122,13 @@ public class VehicleService {
             case AVAILABLE -> findAllAvailableVehicles();
             case MAINTENANCE -> findAllInMaintenanceVehicles();
             case ON_TRIP -> findAllOnTripVehicles();
+            case ASSIGNED -> findAllAssignedVehicles();
         };
     }
 
-
+    private List<VehicleResponse> findAllAssignedVehicles() {
+        return  vehicleRepository.findAllAssignedVehicles().stream().map(vehicleMapper::toResponse).toList();
+    }
 
 
 }

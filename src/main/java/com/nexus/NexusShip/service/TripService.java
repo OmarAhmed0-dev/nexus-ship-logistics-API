@@ -26,15 +26,27 @@ public class TripService {
     private final TripMapper tripMapper;
 
     @Transactional
-    public TripResponse creatTrip(TripRequest request, ShipmentStatus shipmentStatus) {
+    public TripResponse createTrip(TripRequest request, ShipmentStatus shipmentStatus) {
 
         if ((shipmentStatus != ShipmentStatus.PENDING) && (shipmentStatus != ShipmentStatus.ARRIVED_AT_HUB)) {
             throw new IllegalStateException("Invalid Status");
         }
 
         tripRepository.findActiveTripForDriver(request.driverId()).ifPresent(trip -> {
-            throw new IllegalStateException("Driver is already assigned to an ACTIVE trip.");
+            throw new IllegalStateException("Driver is already assigned to a trip.");
         });
+
+        Driver driver = driverRepository.findById(request.driverId())
+                .orElseThrow(() -> new NotFoundException("Driver not found with id " + request.driverId()));
+
+        Vehicle vehicle = vehicleRepository.findById(request.vehicleId())
+                .orElseThrow(() -> new NotFoundException("Vehicle not found with id " + request.vehicleId()));
+
+        if (!vehicle.getStatus().equals(VehicleStatus.AVAILABLE)) {
+            throw new IllegalStateException("Vehicle status is not AVAILABLE");
+        }
+
+
         List<Shipment> shipmentList;
         if (shipmentStatus == ShipmentStatus.PENDING) {
 
@@ -52,23 +64,16 @@ public class TripService {
                             request.city());
         }
 
-
         if (shipmentList.isEmpty()) {
             throw new IllegalStateException("No target shipments found for " + request.governorate() + ", " + request.city());
         }
-        Driver driver = driverRepository.findById(request.driverId())
-                .orElseThrow(() -> new NotFoundException("Driver not found with id " + request.driverId()));
 
-        Vehicle vehicle = vehicleRepository.findById(request.vehicleId())
-                .orElseThrow(() -> new NotFoundException("Vehicle not found with id " + request.vehicleId()));
 
-        if (!vehicle.getStatus().equals(VehicleStatus.AVAILABLE)) {
-            throw new IllegalStateException("Vehicle status is not AVAILABLE");
-        }
         Trip trip = new Trip();
         trip.setStatus(TripStatus.READY);
         trip.setDriver(driver);
         trip.setVehicle(vehicle);
+        vehicle.setStatus(VehicleStatus.ASSIGNED);
 
         for (Shipment shipment : shipmentList) {
             if (vehicleHaveCapacity(shipment, vehicle)) {
@@ -203,4 +208,13 @@ public class TripService {
     }
 
 
+    public List<TripResponse> findAllTrips() {
+        return tripRepository.findAll().stream().map(tripMapper::toResponse).toList();
+    }
+
+
+    public TripResponse findTripById(Long tripId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new NotFoundException("Trip not found with id " + tripId));
+        return tripMapper.toResponse(trip);
+    }
 }

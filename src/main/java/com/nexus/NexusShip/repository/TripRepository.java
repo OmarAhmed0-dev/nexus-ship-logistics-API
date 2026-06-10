@@ -20,8 +20,11 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
     //Find Active trip for Specific driver
 
-    @Query("SELECT t from Trip t where t.driver.id = :driverId AND t.status='ACTIVE'")
+    @Query("SELECT t from Trip t where t.driver.id = :driverId AND( t.status='ACTIVE' OR t.status='READY')")
     Optional<Trip> findActiveTripForDriver(@Param("driverId") Long driverId);
+
+
+
 
 
 

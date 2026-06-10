@@ -1,9 +1,6 @@
 package com.nexus.NexusShip.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +21,7 @@ public class Admin extends User{
     private LocalDateTime hireDate;
 
     @Column(name = "admin_role",nullable = false)
+    @Enumerated(EnumType.STRING)
     private AdminRole adminRole;
 
 
