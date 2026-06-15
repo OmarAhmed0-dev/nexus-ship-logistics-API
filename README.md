@@ -1,6 +1,6 @@
 # Nexus Ship Logistics API 🚀
 
-Nexus Ship Logistics API is an enterprise-grade supply chain and fleet logistics backend system engineered with **Spring Boot 3** and **PostgreSQL/PostGIS**. It is designed to manage multi-tenant shipping operations, automated trip dispatching, geospatial routing, and precise vehicle capacity constraints.
+Nexus Ship Logistics API is an enterprise-grade supply chain and fleet logistics backend system engineered with **Spring Boot 3** and **PostgreSQL/PostGIS**. It is designed to manage shipping operations, automated trip dispatching, geospatial routing, and precise vehicle capacity constraints.
 
 Instead of following generic e-commerce CRUD patterns, this project focuses heavily on complex data modeling, relational integrity, spatial tracking, and algorithmic resource optimization.
 
