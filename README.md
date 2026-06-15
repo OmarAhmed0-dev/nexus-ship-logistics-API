@@ -40,8 +40,8 @@ The relational schema is highly normalized to enforce data security and domain b
 
 ## 🛠️ Technology Stack
 
-* **Framework:** Spring Boot 3.x (Spring Data JPA, Spring Web)
-* **Database:** PostgreSQL (15+) + PostGIS Spatial Extension
+* **Framework:** Spring Boot 4.0.5 (Spring Data JPA, Spring Web)
+* **Database:** PostgreSQL  + PostGIS Spatial Extension
 * **Geospatial Library:** org.locationtech.jts (Java Topology Suite)
 * **Boilerplate Reduction:** Project Lombok
 * **Validation:** Jakarta Validation API (Hibernate Validator)
@@ -58,9 +58,3 @@ The relational schema is highly normalized to enforce data security and domain b
 * `PUT /{id}/end-delivery` - Ends a delivery leg, transitioning all payloads to the final destination.
 * `PUT /{id}/cancel` - Drops a trip before transit begins, resetting payload states and restoring fleet capacity immediately.
 
----
-
-
-2. **Database Setup:** Create a database named `nexus_ship` and execute:
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS postgis;
